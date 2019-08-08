@@ -1,3 +1,4 @@
+const { Plugin } = require('@uppy/core')
 class CosUppy extends Plugin {
     constructor(uppy, opts) {
         super(uppy, opts)
