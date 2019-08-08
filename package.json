@@ -4,5 +4,12 @@
   "main": "index.js",
   "repository": "git@lab.hackplan.com:paio/cos-uppy-plugin.git",
   "author": "RemiIO <i@linux.dog>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@uppy/core": "^1.2.0",
+    "compressorjs": "^1.0.5"
+  },
+  "scripts": {
+    "build": "browserify main.js -o dist/bundle.js"
+  }
 }
