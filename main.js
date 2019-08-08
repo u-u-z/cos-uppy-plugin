@@ -1,4 +1,5 @@
 const { Plugin } = require('@uppy/core')
+const cuid = require('cuid')
 class CosUppy extends Plugin {
     constructor(uppy, opts) {
         super(uppy, opts)
@@ -10,6 +11,28 @@ class CosUppy extends Plugin {
         this.stsUrl = opts.stsUrl || 'test'
         this.protocol = location.protocol === 'https:' ? 'https:' : 'http:'
         this.prefix = this.protocol + '//' + this.bucket + '.cos.' + this.region + '.myqcloud.com/'
+        uppy.on('file-added', (file) => {
+            console.log('Added file', file)
+        })
+    }
+
+    getOptions(file) {
+        const overrides = this.uppy.getState().xhrUpload
+        const opts = {
+            ...this.opts,
+            ...(overrides || {}),
+            ...(file.xhrUpload || {}),
+            headers: {}
+        }
+        Object.assign(opts.headers, this.opts.headers)
+        if (overrides) {
+            Object.assign(opts.headers, overrides.headers)
+        }
+        if (file.xhrUpload) {
+            Object.assign(opts.headers, file.xhrUpload.headers)
+        }
+
+        return opts
     }
 
     camSafeUrlEncode(str) {
@@ -39,21 +62,21 @@ class CosUppy extends Plugin {
             if (file.error) {
                 return () => Promise.reject(new Error(file.error))
             } else if (file.isRemote) {
-                // We emit upload-started here, so that it's also emitted for files
-                // that have to wait due to the `limit` option.
-                this.uppy.emit('upload-started', file)
-                return this.uploadRemote.bind(this, file, current, total)
+                return () => Promise.reject(new Error("暂时只支持本地文件上传"))
             } else {
-                this.uppy.emit('upload-started', file)
-                return this.upload.bind(this, file, current, total)
+                return this.authorizationAndUpdate(file, current, total)
             }
         })
-        const promises = actions.map((action) => {
-            const limitedAction = this.limitUploads(action)
-            return limitedAction()
-        })
+    }
 
-        return settle(promises)
+    authorizationAndUpdate(file, current, total) {
+        const opts = this.getOptions(file)
+        return new Promise((resolve, reject) => {
+            
+
+            const xhr = new XMLHttpRequest()
+            const id = cuid()
+        })
     }
 
     install() {
@@ -64,3 +87,5 @@ class CosUppy extends Plugin {
         this.uppy.removeUploader(this.uploader)
     }
 }
+
+window.CosUppy = CosUppy
