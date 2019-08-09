@@ -223,7 +223,7 @@ class CosUppy extends Plugin {
     uploadFiles(files) {
         const actions = files.map((file, i) => {
             const current = parseInt(i, 10) + 1
-            const total = files.length
+            const total = file.length
 
             if (file.error) {
                 return () => Promise.reject(new Error(file.error))
@@ -293,6 +293,15 @@ class CosUppy extends Plugin {
                 xhr.upload.onprogress = (e) => {
                     console.log('上传进度 ' + (Math.round(e.loaded / e.total * 10000) / 100) + '%');
                 };
+
+                xhr.upload.addEventListener('progress', (ev) => {
+                    this.uppy.emit('upload-progress', file, {
+                        uploader: this,
+                        bytesUploaded: ev.loaded / ev.total * file.size,
+                        bytesTotal: file.size
+                    })
+//
+                })
 
                 xhr.onload = () => {
                     console.log("上传成功")
