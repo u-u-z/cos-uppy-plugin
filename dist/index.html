@@ -57,9 +57,9 @@
                 locale: LocalUppy // in bundle.js -- window.LocalUppy is Local settings
             }) 
             .use(window.CosUppy, {  //use CosUppy plugin  
-                bucket: 'remi-1256314360', 
-                region: 'ap-beijing',
-                stsUrl: 'http://127.0.0.1:6275/cos/sts',
+                bucket: 'remi-1256314360', // bucket id
+                region: 'ap-beijing', // 所属 区域
+                stsUrl: 'http://127.0.0.1:6275/cos/sts', // STS API URL
                 protocol: 'http'
             })
         uppy.on('complete', (result) => {
