@@ -142,7 +142,7 @@ class CosUppy extends Plugin {
                         bytesUploaded: ev.loaded / ev.total * file.size,
                         bytesTotal: file.size
                     })
-//
+                    //
                 })
 
                 xhr.onload = () => {
@@ -187,6 +187,14 @@ class CosUppy extends Plugin {
         this.uppy.removeUploader(this.uploader)
     }
 }
+
+/*
+    if(typeof module === 'object'){
+        module.exports = CosAuth;
+    }else{
+        window.CosAuth = CosAuth;
+    }
+*/
 
 window.CosUppy = CosUppy
 window.LocalUppy = {

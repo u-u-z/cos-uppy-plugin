@@ -11,9 +11,11 @@
     "@uppy/utils": "^1.2.0",
     "compressorjs": "^1.0.5",
     "cos-js-sdk-v5": "^0.5.17",
-    "cuid": "^2.1.6"
+    "cuid": "^2.1.6",
+    "express": "^4.17.1"
   },
   "scripts": {
-    "build": "browserify main.js -o dist/bundle.js"
+    "build": "browserify main.js -o dist/bundle.js",
+    "start": "node local-server.js"
   }
 }

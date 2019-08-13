@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Uppy</title>
+    <link href="./uppy.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="drag-drop-area"></div>
+
+    <script src="./uppy.min.js"></script>
+
+    <script src="./bundle.js"></script>
+    <script>
+
+        /*
+            Example of Uppy plugin.
+            style config doc : https://uppy.io/docs/dashboard/#Options
+
+        */
+        var uppy = Uppy.Core().use(Uppy.Webcam)
+            .use(Uppy.Dashboard, {
+                plugins: ['Webcam'],
+                inline: true,
+                target: '#drag-drop-area',
+                width: 250,
+                height: 250,
+                thumbnailWidth: 280,
+                showLinkToFileUploadResult: true,
+                showProgressDetails: false,
+                hideUploadButton: false,
+                hideRetryButton: false,
+                hidePauseResumeButton: false,
+                hideCancelButton: false,
+                hideProgressAfterFinish: false,
+                note: null,
+                closeModalOnClickOutside: false,
+                closeAfterFinish: false,
+                disableStatusBar: false,
+                disableInformer: false,
+                disableThumbnailGenerator: false,
+                disablePageScrollWhenModalOpen: true,
+                animateOpenClose: true,
+                proudlyDisplayPoweredByUppy: true,
+                onRequestCloseModal: () => this.closeModal(),
+                showSelectedFiles: true,
+                browserBackButtonClose: false,
+                locale: LocalUppy // in bundle.js -- window.LocalUppy is Local settings
+            }) 
+            .use(window.CosUppy, {  //use CosUppy plugin  
+                bucket: 'remi-1256314360', 
+                region: 'ap-beijing',
+                stsUrl: 'http://127.0.0.1:6275/cos/sts',
+                protocol: 'http'
+            })
+        uppy.on('complete', (result) => {
+            console.log('Upload complete! We’ve uploaded these files:', result.successful)
+        })
+    </script>
+</body>
+
+</html>
