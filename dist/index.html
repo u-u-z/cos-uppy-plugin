@@ -21,6 +21,11 @@
 
             TODO: 1. 完成前端样式；
                   2. 确定 STS 鉴权方式，完成 STS；
+
+            COS 设置：
+                1. 申请 个 Cos bucket
+                2. 基础配置 - 跨域访问：设置 CORS 允许 前端上传域上传；
+                3. 权限管理 - Policy权限设置：设置 STS （STS 请求的 逻辑在 mark 中）
         */
         var uppy = Uppy.Core().use(Uppy.Webcam)
             .use(Uppy.Dashboard, {
