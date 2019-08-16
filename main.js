@@ -77,106 +77,69 @@ class CosUppy extends Plugin {
         })
     }
 
-    // 获取签名
-    getAuthorization(options, cb) {
+    getTokenUrl(file, current, total) {
+        const opts = this.getOptions(file)
+        // Get Token Url
+        let xhr = new XMLHttpRequest();
+        let fileSize = file.size
+        let url = this.stsUrl
+        let key = file.name
         return new Promise((resolve, reject) => {
-            var url = this.stsUrl
-            //var url = '../server/sts.php';
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
+            xhr.open('GET', `${url}?key=${key}&contentLength=${fileSize}`, true);
             xhr.onreadystatechange = (e) => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        var credentials;
-                        try {
-                            credentials = (new Function('return ' + xhr.responseText))().credentials;
-                        } catch (e) { }
-                        if (credentials) {
-                            cb(null, {
-                                XCosSecurityToken: credentials.sessionToken,
-                                Authorization: cosAuth({
-                                    SecretId: credentials.tmpSecretId,
-                                    SecretKey: credentials.tmpSecretKey,
-                                    Method: options.Method,
-                                    Pathname: options.Pathname,
-                                })
-                            }).then(resolve())
-                        } else {
-                            console.error(xhr.responseText);
-                            cb('获取签名出错').then(reject());
-                        }
-                    } else {
-                        cb('获取签名出错').then(reject());
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        let tokenUrl = JSON.parse(`${xhr.responseText}`)
+                        resolve(tokenUrl.token, fileSize)
+                    } catch (e) {
+                        reject()
                     }
                 }
-            };
-            xhr.send();
+            }
+            xhr.send()
         })
-    };
-
-    uploadFile(file, callback) {
-        var Key = 'dir/' + file.name;
-
-        this.getAuthorization({ Method: 'POST', Pathname: '/' }, (err, info) => {
-            return new Promise((resolve, reject) => {
-                var fd = new FormData();
-                fd.append('key', Key);
-                fd.append('Signature', info.Authorization);
-                fd.append('Content-Type', '');
-
-                info.XCosSecurityToken && fd.append('x-cos-security-token', info.XCosSecurityToken);
-                fd.append('file', file);
-
-                var url = this.prefix;
-                var xhr = new XMLHttpRequest();
-
-                xhr.open('POST', url)
-
-                xhr.upload.onprogress = (e) => {
-                    console.log('上传进度 ' + (Math.round(e.loaded / e.total * 10000) / 100) + '%');
-                };
-
-                xhr.upload.addEventListener('progress', (ev) => {
-                    this.uppy.emit('upload-progress', file, {
-                        uploader: this,
-                        bytesUploaded: ev.loaded / ev.total * file.size,
-                        bytesTotal: file.size
-                    })
-                    //
-                })
-
-                xhr.onload = () => {
-                    console.log("上传成功")
-                    resolve();
-
-                };
-
-                xhr.onerror = () => {
-                    callback('文件 ' + Key + ' 上传失败，请检查是否没配置 CORS 跨域规则');
-                    reject();
-                };
-
-                xhr.send(fd);
-            })
-
-        });
-    };
-
+    }
+    putFile(file, tokenUrl) {
+        let xhr = new XMLHttpRequest();
+        let url = tokenUrl;
+        return new Promise((resolve, reject) => {
+            xhr.open('PUT', `${url}`, true)
+            xhr.onreadystatechange = (event) => {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        resolve()
+                    } else {
+                        reject(new Error('test'))
+                    }
+                }
+            }
+            xhr.send(file.data)
+        })
+    }
 
     authorizationAndUpdate(file, current, total) {
-        const opts = this.getOptions(file)
 
         return new Promise((resolve, reject) => {
-            file && this.uploadFile(file, function (err, data) {
-                if (err) {
-                    reject()
-                } else {
-                    console.log(err || data);
-                    console.log(上传成功);
+            this.getTokenUrl(file, current, total).then((tokenUrl) => {
+                this.putFile(file, tokenUrl).then(() => {
                     resolve()
-                }
-            });
+                }).catch(() => {
+                    reject()
+                })
+            })
+            // this.getTokenUrl(file, current, total).then((tokenUrl) => {
+            //     this.putFile(file, tokenUrl).then(() => {
+            //         resolve()
+            //     })
+            // }).catch((e) => {
+            //     console.error(`authorizationAndUpdate: reject`, e)
+            //     reject()
+            // })
         })
+
+
+
+
     }
 
     install() {

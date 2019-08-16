@@ -320,21 +320,69 @@ class CosUppy extends Plugin {
         });
     };
 
+    getTokenUrl(file, current, total) {
+        const opts = this.getOptions(file)
+        // Get Token Url
+        let xhr = new XMLHttpRequest();
+        let fileSize = file.size
+        let url = this.stsUrl
+        let key = file.name
+        return new Promise((resolve, reject) => {
+            xhr.open('GET', `${url}?key=${key}&contentLength=${fileSize}`, true);
+            xhr.onreadystatechange = (e) => {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        let tokenUrl = JSON.parse(`${xhr.responseText}`)
+                        resolve(tokenUrl.token, fileSize)
+                    } catch (e) {
+                        reject()
+                    }
+                }
+            }
+            xhr.send()
+        })
+    }
+    putFile(file, tokenUrl) {
+        let xhr = new XMLHttpRequest();
+        let url = tokenUrl;
+        return new Promise((resolve, reject) => {
+            xhr.open('PUT', `${url}`, true)
+            xhr.onreadystatechange = (event) => {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        resolve()
+                    } else {
+                        reject(new Error('test'))
+                    }
+                }
+            }
+            xhr.send(file.data)
+        })
+    }
 
     authorizationAndUpdate(file, current, total) {
-        const opts = this.getOptions(file)
 
         return new Promise((resolve, reject) => {
-            file && this.uploadFile(file, function (err, data) {
-                if (err) {
-                    reject()
-                } else {
-                    console.log(err || data);
-                    console.log(上传成功);
+            this.getTokenUrl(file, current, total).then((tokenUrl) => {
+                this.putFile(file, tokenUrl).then(() => {
                     resolve()
-                }
-            });
+                }).catch(() => {
+                    reject()
+                })
+            })
+            // this.getTokenUrl(file, current, total).then((tokenUrl) => {
+            //     this.putFile(file, tokenUrl).then(() => {
+            //         resolve()
+            //     })
+            // }).catch((e) => {
+            //     console.error(`authorizationAndUpdate: reject`, e)
+            //     reject()
+            // })
         })
+
+
+
+
     }
 
     install() {

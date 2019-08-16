@@ -59,7 +59,7 @@
             .use(window.CosUppy, {  //use CosUppy plugin  
                 bucket: 'remi-1256314360', // bucket id
                 region: 'ap-beijing', // 所属 区域
-                stsUrl: 'http://127.0.0.1:6275/cos/sts', // STS API URL
+                stsUrl: 'http://127.0.0.1:6275/cos/1256314360/upload/url', // STS API URL
                 protocol: 'http'
             })
         uppy.on('complete', (result) => {
