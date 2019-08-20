@@ -159,6 +159,8 @@
 const { Plugin } = require('@uppy/core')
 const cuid = require('cuid')
 const cosAuth = require('./cos-auth')
+
+
 class CosUppy extends Plugin {
     constructor(uppy, opts) {
         super(uppy, opts)
@@ -258,10 +260,147 @@ class CosUppy extends Plugin {
             xhr.send()
         })
     }
+
+    createProgressTimeout(timeout, timeoutHandler) {
+        const uppy = this.uppy
+        const self = this
+        let isDone = false
+
+        function onTimedOut() {
+            uppy.log(`[XHRUpload] timed out`)
+            const error = new Error(`timeout!`)
+            timeoutHandler(error)
+        }
+
+        let aliveTimer = null
+        function progress() {
+            // Some browsers fire another progress event when the upload is
+            // cancelled, so we have to ignore progress after the timer was
+            // told to stop.
+            if (isDone) return
+
+            if (timeout > 0) {
+                if (aliveTimer) clearTimeout(aliveTimer)
+                aliveTimer = setTimeout(onTimedOut, timeout)
+            }
+        }
+
+        function done() {
+            uppy.log(`[XHRUpload] timer done`)
+            if (aliveTimer) {
+                clearTimeout(aliveTimer)
+                aliveTimer = null
+            }
+            isDone = true
+        }
+
+        return {
+            progress,
+            done
+        }
+    }
+    validateStatus(status, responseText, response) {
+        return status >= 200 && status < 300
+    }
+
+    getResponseData(responseText, response) {
+        let parsedResponse = {}
+        try {
+            parsedResponse = JSON.parse(responseText)
+        } catch (err) {
+            console.log(err)
+        }
+
+        return parsedResponse
+    }
+
     putFile(file, tokenUrl) {
+        const timer = this.createProgressTimeout(30000, (error) => {
+            xhr.abort()
+            this.uppy.emit('upload-error', file, error)
+            reject(error)
+        })
+
         let xhr = new XMLHttpRequest();
+
+
+
         let url = tokenUrl;
         return new Promise((resolve, reject) => {
+            xhr.upload.addEventListener('loadstart', (ev) => {
+                this.uppy.log(`[XHRUpload] ${file.name} started`)
+            })
+
+            xhr.upload.addEventListener('progress', (ev) => {
+                this.uppy.log(`[XHRUpload] ${file.name} progress: ${ev.loaded} / ${ev.total}`)
+                // Begin checking for timeouts when progress starts, instead of loading,
+                // to avoid timing out requests on browser concurrency queue
+                timer.progress()
+
+                if (ev.lengthComputable) {
+                    this.uppy.emit('upload-progress', file, {
+                        uploader: this,
+                        bytesUploaded: ev.loaded,
+                        bytesTotal: ev.total
+                    })
+                }
+            })
+
+            xhr.addEventListener('load', (ev) => {
+                this.uppy.log(`[XHRUpload] ${file.name} finished`)
+                timer.done()
+
+                if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
+                    const body = this.getResponseData(xhr.responseText, xhr)
+                    const uploadURL = body[this.stsUrl]
+
+                    const uploadResp = {
+                        status: ev.target.status,
+                        body,
+                        uploadURL
+                    }
+
+                    this.uppy.emit('upload-success', file, uploadResp)
+
+                    if (uploadURL) {
+                        this.uppy.log(`Download ${file.name} from ${uploadURL}`)
+                    }
+
+                    return resolve(file)
+                } else {
+                    const body = this.getResponseData(xhr.responseText, xhr)
+                    const error = buildResponseError(xhr, opts.getResponseError(xhr.responseText, xhr))
+
+                    const response = {
+                        status: ev.target.status,
+                        body
+                    }
+
+                    this.uppy.emit('upload-error', file, error, response)
+                    return reject(error)
+                }
+            })
+            xhr.addEventListener('error', (ev) => {
+                this.uppy.log(`[XHRUpload] ${file.name} errored`)
+                timer.done()
+
+                const error = buildResponseError(xhr, opts.getResponseError(xhr.responseText, xhr))
+                this.uppy.emit('upload-error', file, error)
+                return reject(error)
+            })
+            this.uppy.on('file-removed', (removedFile) => {
+                if (removedFile.id === file.id) {
+                    timer.done()
+                    xhr.abort()
+                    reject(new Error('File removed'))
+                }
+            })
+
+            this.uppy.on('cancel-all', () => {
+                timer.done()
+                xhr.abort()
+                reject(new Error('Upload cancelled'))
+            })
             xhr.open('PUT', `${url}`, true)
             xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
@@ -286,19 +425,7 @@ class CosUppy extends Plugin {
                     reject()
                 })
             })
-            // this.getTokenUrl(file, current, total).then((tokenUrl) => {
-            //     this.putFile(file, tokenUrl).then(() => {
-            //         resolve()
-            //     })
-            // }).catch((e) => {
-            //     console.error(`authorizationAndUpdate: reject`, e)
-            //     reject()
-            // })
         })
-
-
-
-
     }
 
     install() {
