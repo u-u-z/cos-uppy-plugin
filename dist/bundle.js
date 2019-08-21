@@ -220,7 +220,7 @@ class CosUppy extends Plugin {
         const files = fileIDs.map((fileID) => this.uppy.getFile(fileID))
 
         let uploadPromise = this.uploadFiles(files)
-        fileIDs.map((fileID) => this.uppy.removeFile(fileID))
+        // fileIDs.map((fileID) => this.uppy.removeFile(fileID))
         return uploadPromise
     }
 
@@ -238,7 +238,6 @@ class CosUppy extends Plugin {
                 return this.authorizationAndUpdate(file, current, total)
             }
         })
-        files = []
     }
 
     getTokenUrl(file, current, total) {
@@ -410,6 +409,7 @@ class CosUppy extends Plugin {
             xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
+                        
                         resolve()
                     } else {
                         reject(new Error('test'))
@@ -425,6 +425,7 @@ class CosUppy extends Plugin {
         return new Promise((resolve, reject) => {
             this.getTokenUrl(file, current, total).then((tokenUrl) => {
                 this.putFile(file, tokenUrl).then(() => {
+                    this.uppy.removeFile(file.id)
                     resolve()
                 }).catch(() => {
                     reject()

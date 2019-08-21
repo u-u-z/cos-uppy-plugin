@@ -62,7 +62,7 @@ class CosUppy extends Plugin {
         const files = fileIDs.map((fileID) => this.uppy.getFile(fileID))
 
         let uploadPromise = this.uploadFiles(files)
-        fileIDs.map((fileID) => this.uppy.removeFile(fileID))
+        // fileIDs.map((fileID) => this.uppy.removeFile(fileID))
         return uploadPromise
     }
 
@@ -266,6 +266,7 @@ class CosUppy extends Plugin {
         return new Promise((resolve, reject) => {
             this.getTokenUrl(file, current, total).then((tokenUrl) => {
                 this.putFile(file, tokenUrl).then(() => {
+                    this.uppy.removeFile(file.id)
                     resolve()
                 }).catch(() => {
                     reject()
