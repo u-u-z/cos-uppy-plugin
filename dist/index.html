@@ -9,7 +9,12 @@
 
 <body>
     <div id="drag-drop-area"></div>
-
+    <div class="grid">
+        <div class="column-full">
+            <div class="UppyInput"></div>
+            <div class="UppyInput-Progress"></div>
+        </div>
+    </div>
     <script src="./uppy.min.js"></script>
 
     <script src="./bundle.js"></script>
@@ -27,7 +32,25 @@
                 2. 基础配置 - 跨域访问：设置 CORS 允许 前端上传域上传；
                 3. 权限管理 - Policy权限设置：设置 STS （STS 请求的 逻辑在 mark 中）
         */
-        var uppy = Uppy.Core().use(Uppy.Webcam)
+        var uppy = Uppy.Core({ debug: true, autoProceed: true })
+            .use(Uppy.FileInput, { target: '.UppyInput', pretty: false })
+            .use(window.CosUppy, {  //use CosUppy plugin  
+                bucket: 'remi-1256314360', // bucket id
+                region: 'ap-beijing', // 所属 区域
+                stsUrl: 'http://127.0.0.1:6275/cos/1256314360/upload/url', // STS API URL
+                protocol: 'http'
+            })
+            .use(Uppy.StatusBar, {
+                target: '.UppyInput-Progress',
+                hideUploadButton: true,
+                hideAfterFinish: false
+            })
+        uppy.on('complete', (result) => {
+                console.log('Upload complete! We’ve uploaded these files:', result.successful)
+            })
+
+        /**
+         * .use(Uppy.Webcam)
             .use(Uppy.Dashboard, {
                 plugins: ['Webcam'],
                 inline: true,
@@ -55,16 +78,8 @@
                 showSelectedFiles: true,
                 browserBackButtonClose: false,
                 locale: LocalUppy // in bundle.js -- window.LocalUppy is Local settings
-            }) 
-            .use(window.CosUppy, {  //use CosUppy plugin  
-                bucket: 'remi-1256314360', // bucket id
-                region: 'ap-beijing', // 所属 区域
-                stsUrl: 'http://127.0.0.1:6275/cos/1256314360/upload/url', // STS API URL
-                protocol: 'http'
             })
-        uppy.on('complete', (result) => {
-            console.log('Upload complete! We’ve uploaded these files:', result.successful)
-        })
+        */
     </script>
 </body>
 

@@ -61,10 +61,13 @@ class CosUppy extends Plugin {
 
         const files = fileIDs.map((fileID) => this.uppy.getFile(fileID))
 
-        return this.uploadFiles(files)
+        let uploadPromise = this.uploadFiles(files)
+        fileIDs.map((fileID) => this.uppy.removeFile(fileID))
+        return uploadPromise
     }
 
     uploadFiles(files) {
+        console.log(files)
         const actions = files.map((file, i) => {
             const current = parseInt(i, 10) + 1
             const total = file.length
@@ -146,14 +149,15 @@ class CosUppy extends Plugin {
     }
 
     getResponseData(responseText, response) {
-        let parsedResponse = {}
-        try {
-            parsedResponse = JSON.parse(responseText)
-        } catch (err) {
-            console.log(err)
-        }
+        // let parsedResponse = {}
+        // console.log("====", responseText, response)
+        // try {
+        //     parsedResponse = JSON.parse(responseText)
+        // } catch (err) {
+        //     console.log(err)
+        // }
 
-        return parsedResponse
+        return {}
     }
 
     putFile(file, tokenUrl) {
