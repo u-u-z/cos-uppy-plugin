@@ -284,13 +284,13 @@ class CosUppy extends Plugin {
     }
 }
 
-/*
-    if(typeof module === 'object'){
-        module.exports = CosAuth;
-    }else{
-        window.CosAuth = CosAuth;
-    }
-*/
+
+if (typeof module === 'object') {
+    module.exports = CosUppy;
+} else {
+    window.CosUppy = CosUppy;
+}
+
 
 window.CosUppy = CosUppy
 window.LocalUppy = {

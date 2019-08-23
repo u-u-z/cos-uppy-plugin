@@ -409,7 +409,6 @@ class CosUppy extends Plugin {
             xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        
                         resolve()
                     } else {
                         reject(new Error('test'))
