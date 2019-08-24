@@ -1,7 +1,7 @@
 {
   "name": "cos-uppy-plugin",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "1.0.2",
+  "main": "main.js",
   "repository": "git@lab.hackplan.com:paio/cos-uppy-plugin.git",
   "author": "RemiIO <i@linux.dog>",
   "license": "MIT",

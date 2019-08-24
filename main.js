@@ -157,7 +157,7 @@ class CosUppy extends Plugin {
         //     console.log(err)
         // }
 
-        return {}
+        // return {}
     }
 
     putFile(file, tokenUrl) {
@@ -197,16 +197,8 @@ class CosUppy extends Plugin {
                 timer.done()
 
                 if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
-                    const body = this.getResponseData(xhr.responseText, xhr)
-                    const uploadURL = body[this.stsUrl]
-
-                    const uploadResp = {
-                        status: ev.target.status,
-                        body,
-                        uploadURL
-                    }
-
-                    this.uppy.emit('upload-success', file, uploadResp)
+                    
+                    this.uppy.emit('upload-success', file)
 
                     if (uploadURL) {
                         this.uppy.log(`Download ${file.name} from ${uploadURL}`)
@@ -251,6 +243,15 @@ class CosUppy extends Plugin {
             xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
+                        const body = this.getResponseData(xhr.responseText, xhr)
+                        const uploadURL = body[this.stsUrl]
+                        const uploadResp = {
+                            status: ev.target.status,
+                            body,
+                            uploadURL
+                        }
+
+                        this.uppy.emit('upload-success', file, uploadResp)
                         resolve()
                     } else {
                         reject(new Error('test'))
