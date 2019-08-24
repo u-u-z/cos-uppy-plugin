@@ -267,7 +267,6 @@ class CosUppy extends Plugin {
         return new Promise((resolve, reject) => {
             this.getTokenUrl(file, current, total).then((tokenUrl) => {
                 this.putFile(file, tokenUrl).then(() => {
-                    this.uppy.removeFile(file.id)
                     resolve()
                 }).catch(() => {
                     reject()
