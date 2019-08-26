@@ -197,8 +197,10 @@ class CosUppy extends Plugin {
                 timer.done()
 
                 if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
-                    
-                    this.uppy.emit('upload-success', file)
+                    const fakeUploadResp = {
+                        uploadURL:"test"
+                    }
+                    this.uppy.emit('upload-success', file, fakeUploadResp)
                     // if (uploadURL) {
                     //     this.uppy.log(`Download ${file.name} from ${uploadURL}`)
                     // }
@@ -242,7 +244,10 @@ class CosUppy extends Plugin {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         const body = this.getResponseData(xhr.responseText, xhr)
-                        this.uppy.emit('upload-success', file)
+                        const fakeUploadResp = {
+                            uploadURL:"test"
+                        }
+                        this.uppy.emit('upload-success', file, fakeUploadResp)
                         resolve()
                     } else {
                         reject(new Error('test'))
