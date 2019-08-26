@@ -161,7 +161,7 @@ class CosUppy extends Plugin {
     }
 
     putFile(file, tokenUrl) {
-        const timer = this.createProgressTimeout(30000, (error) => {
+        const timer = this.createProgressTimeout(300000, (error) => {
             xhr.abort()
             this.uppy.emit('upload-error', file, error)
             reject(error)
@@ -244,12 +244,7 @@ class CosUppy extends Plugin {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         const body = this.getResponseData(xhr.responseText, xhr)
-                        const uploadResp = {
-                            status: ev.target.status,
-                            body
-                        }
-
-                        this.uppy.emit('upload-success', file, uploadResp)
+                        this.uppy.emit('upload-success', file)
                         resolve()
                     } else {
                         reject(new Error('test'))
