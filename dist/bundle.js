@@ -315,11 +315,11 @@ class CosUppy extends Plugin {
         //     console.log(err)
         // }
 
-        return {}
+        // return {}
     }
 
     putFile(file, tokenUrl) {
-        const timer = this.createProgressTimeout(30000, (error) => {
+        const timer = this.createProgressTimeout(300000, (error) => {
             xhr.abort()
             this.uppy.emit('upload-error', file, error)
             reject(error)
@@ -355,21 +355,11 @@ class CosUppy extends Plugin {
                 timer.done()
 
                 if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
-                    const body = this.getResponseData(xhr.responseText, xhr)
-                    const uploadURL = body[this.stsUrl]
-
-                    const uploadResp = {
-                        status: ev.target.status,
-                        body,
-                        uploadURL
-                    }
-
-                    this.uppy.emit('upload-success', file, uploadResp)
-
-                    if (uploadURL) {
-                        this.uppy.log(`Download ${file.name} from ${uploadURL}`)
-                    }
-
+                    
+                    this.uppy.emit('upload-success', file)
+                    // if (uploadURL) {
+                    //     this.uppy.log(`Download ${file.name} from ${uploadURL}`)
+                    // }
                     return resolve(file)
                 } else {
                     const body = this.getResponseData(xhr.responseText, xhr)
@@ -409,6 +399,8 @@ class CosUppy extends Plugin {
             xhr.onreadystatechange = (event) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
+                        const body = this.getResponseData(xhr.responseText, xhr)
+                        this.uppy.emit('upload-success', file)
                         resolve()
                     } else {
                         reject(new Error('test'))
@@ -424,7 +416,6 @@ class CosUppy extends Plugin {
         return new Promise((resolve, reject) => {
             this.getTokenUrl(file, current, total).then((tokenUrl) => {
                 this.putFile(file, tokenUrl).then(() => {
-                    this.uppy.removeFile(file.id)
                     resolve()
                 }).catch(() => {
                     reject()
@@ -442,13 +433,13 @@ class CosUppy extends Plugin {
     }
 }
 
-/*
-    if(typeof module === 'object'){
-        module.exports = CosAuth;
-    }else{
-        window.CosAuth = CosAuth;
-    }
-*/
+
+if (typeof module === 'object') {
+    module.exports = CosUppy;
+} else {
+    window.CosUppy = CosUppy;
+}
+
 
 window.CosUppy = CosUppy
 window.LocalUppy = {

@@ -199,11 +199,9 @@ class CosUppy extends Plugin {
                 if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
                     
                     this.uppy.emit('upload-success', file)
-
-                    if (uploadURL) {
-                        this.uppy.log(`Download ${file.name} from ${uploadURL}`)
-                    }
-
+                    // if (uploadURL) {
+                    //     this.uppy.log(`Download ${file.name} from ${uploadURL}`)
+                    // }
                     return resolve(file)
                 } else {
                     const body = this.getResponseData(xhr.responseText, xhr)
