@@ -244,11 +244,9 @@ class CosUppy extends Plugin {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         const body = this.getResponseData(xhr.responseText, xhr)
-                        const uploadURL = body[this.stsUrl]
                         const uploadResp = {
                             status: ev.target.status,
-                            body,
-                            uploadURL
+                            body
                         }
 
                         this.uppy.emit('upload-success', file, uploadResp)
