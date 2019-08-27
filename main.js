@@ -96,7 +96,7 @@ class CosUppy extends Plugin {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
                         let tokenUrl = JSON.parse(`${xhr.responseText}`)
-                        resolve(tokenUrl.token, fileSize)
+                        resolve(tokenUrl.token, fileSize, tokenUrl.key)
                     } catch (e) {
                         reject()
                     }
@@ -160,7 +160,7 @@ class CosUppy extends Plugin {
         // return {}
     }
 
-    putFile(file, tokenUrl) {
+    putFile(file, tokenUrl, key) {
         const timer = this.createProgressTimeout(300000, (error) => {
             xhr.abort()
             this.uppy.emit('upload-error', file, error)
@@ -245,7 +245,8 @@ class CosUppy extends Plugin {
                     if (xhr.status === 200) {
                         const body = this.getResponseData(xhr.responseText, xhr)
                         const fakeUploadResp = {
-                            uploadURL:"test"
+                            uploadURL:"test",
+                            key: key
                         }
                         this.uppy.emit('upload-success', file, fakeUploadResp)
                         resolve()
@@ -261,8 +262,8 @@ class CosUppy extends Plugin {
     authorizationAndUpdate(file, current, total) {
 
         return new Promise((resolve, reject) => {
-            this.getTokenUrl(file, current, total).then((tokenUrl) => {
-                this.putFile(file, tokenUrl).then(() => {
+            this.getTokenUrl(file, current, total).then((tokenUrl,key) => {
+                this.putFile(file, tokenUrl,key).then(() => {
                     resolve()
                 }).catch(() => {
                     reject()
