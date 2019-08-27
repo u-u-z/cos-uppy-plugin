@@ -198,7 +198,8 @@ class CosUppy extends Plugin {
 
                 if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
                     const fakeUploadResp = {
-                        uploadURL:"test"
+                        uploadURL:"test",
+                        key: key
                     }
                     this.uppy.emit('upload-success', file, fakeUploadResp)
                     // if (uploadURL) {
@@ -262,8 +263,8 @@ class CosUppy extends Plugin {
     authorizationAndUpdate(file, current, total) {
 
         return new Promise((resolve, reject) => {
-            this.getTokenUrl(file, current, total).then((tokenUrl,key) => {
-                this.putFile(file, tokenUrl,key).then(() => {
+            this.getTokenUrl(file, current, total).then((tokenUrl, key) => {
+                this.putFile(file, tokenUrl, key).then(() => {
                     resolve()
                 }).catch(() => {
                     reject()
