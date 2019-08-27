@@ -89,14 +89,14 @@ class CosUppy extends Plugin {
         let fileSize = file.size
         let url = this.stsUrl
         let key = file.name
-        console.log(file)
         return new Promise((resolve, reject) => {
             xhr.open('GET', `${url}?key=${key}&contentLength=${fileSize}&contentType=${file.type}`, true);
             xhr.onreadystatechange = (e) => {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
                         let tokenUrl = JSON.parse(`${xhr.responseText}`)
-                        resolve(tokenUrl.token, fileSize, tokenUrl.key)
+                        console.log(`================`,tokenUrl.token, fileSize, tokenUrl.key)
+                        resolve([tokenUrl.token, fileSize, tokenUrl.key])
                     } catch (e) {
                         reject()
                     }
@@ -263,7 +263,8 @@ class CosUppy extends Plugin {
     authorizationAndUpdate(file, current, total) {
 
         return new Promise((resolve, reject) => {
-            this.getTokenUrl(file, current, total).then((tokenUrl, key) => {
+            this.getTokenUrl(file, current, total).then(([tokenUrl, fileSize, key]) => {
+                console.log(`authorizationAndUpdate`,tokenUrl, fileSize, key)
                 this.putFile(file, tokenUrl, key).then(() => {
                     resolve()
                 }).catch(() => {
