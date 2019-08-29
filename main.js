@@ -181,34 +181,34 @@ class CosUppy extends Plugin {
                     })
                 }
             })
+            // TODO need fix success onload to this!
+            // xhr.addEventListener('load', (ev) => {
+            //     this.uppy.log(`[XHRUpload] ${file.name} finished`)
+            //     timer.done()
 
-            xhr.addEventListener('load', (ev) => {
-                this.uppy.log(`[XHRUpload] ${file.name} finished`)
-                timer.done()
+            //     if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
+            //         const fakeUploadResp = {
+            //             uploadURL:"test",
+            //             key: key
+            //         }
+            //         this.uppy.emit('upload-success', file, fakeUploadResp)
+            //         // if (uploadURL) {
+            //         //     this.uppy.log(`Download ${file.name} from ${uploadURL}`)
+            //         // }
+            //         return resolve(file)
+            //     } else {
+            //         const body = this.getResponseData(xhr.responseText, xhr)
+            //         const error = buildResponseError(xhr, opts.getResponseError(xhr.responseText, xhr))
 
-                if (this.validateStatus(ev.target.status, xhr.responseText, xhr)) {
-                    const fakeUploadResp = {
-                        uploadURL:"test",
-                        key: key
-                    }
-                    this.uppy.emit('upload-success', file, fakeUploadResp)
-                    // if (uploadURL) {
-                    //     this.uppy.log(`Download ${file.name} from ${uploadURL}`)
-                    // }
-                    return resolve(file)
-                } else {
-                    const body = this.getResponseData(xhr.responseText, xhr)
-                    const error = buildResponseError(xhr, opts.getResponseError(xhr.responseText, xhr))
+            //         const response = {
+            //             status: ev.target.status,
+            //             body
+            //         }
 
-                    const response = {
-                        status: ev.target.status,
-                        body
-                    }
-
-                    this.uppy.emit('upload-error', file, error, response)
-                    return reject(error)
-                }
-            })
+            //         this.uppy.emit('upload-error', file, error, response)
+            //         return reject(error)
+            //     }
+            // })
             xhr.addEventListener('error', (ev) => {
                 this.uppy.log(`[XHRUpload] ${file.name} errored`)
                 timer.done()
@@ -217,12 +217,7 @@ class CosUppy extends Plugin {
                 this.uppy.emit('upload-error', file, error)
                 return reject(error)
             })
-            this.uppy.on('file-removed', (removedFile) => {
-                if (removedFile.id === file.id) {
-                    timer.done()
-                    xhr.abort()
-                }
-            })
+            
 
             this.uppy.on('cancel-all', () => {
                 timer.done()
