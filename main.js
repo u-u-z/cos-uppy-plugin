@@ -234,6 +234,7 @@ class CosUppy extends Plugin {
                             key: key
                         }
                         this.uppy.emit('upload-success', file, fakeUploadResp)
+                        timer.done()
                         resolve()
                     } else {
                         reject(new Error('test'))
