@@ -67,7 +67,6 @@ class CosUppy extends Plugin {
     }
 
     uploadFiles(files) {
-        console.log(files)
         const actions = files.map((file, i) => {
             const current = parseInt(i, 10) + 1
             const total = file.length
@@ -95,7 +94,6 @@ class CosUppy extends Plugin {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     try {
                         let tokenUrl = JSON.parse(`${xhr.responseText}`)
-                        console.log(`================`,tokenUrl.token, fileSize, tokenUrl.key)
                         resolve([tokenUrl.token, fileSize, tokenUrl.key])
                     } catch (e) {
                         reject()
@@ -149,15 +147,7 @@ class CosUppy extends Plugin {
     }
 
     getResponseData(responseText, response) {
-        // let parsedResponse = {}
-        // console.log("====", responseText, response)
-        // try {
-        //     parsedResponse = JSON.parse(responseText)
-        // } catch (err) {
-        //     console.log(err)
-        // }
 
-        // return {}
     }
 
     putFile(file, tokenUrl, key) {
@@ -231,7 +221,6 @@ class CosUppy extends Plugin {
                 if (removedFile.id === file.id) {
                     timer.done()
                     xhr.abort()
-                    reject(new Error('File removed'))
                 }
             })
 
@@ -264,10 +253,9 @@ class CosUppy extends Plugin {
 
         return new Promise((resolve, reject) => {
             this.getTokenUrl(file, current, total).then(([tokenUrl, fileSize, key]) => {
-                console.log(`authorizationAndUpdate`,tokenUrl, fileSize, key)
                 this.putFile(file, tokenUrl, key).then(() => {
                     resolve()
-                }).catch(() => {
+                }).catch((e) => {
                     reject()
                 })
             })
