@@ -91,12 +91,23 @@ class CosUppy extends Plugin {
         return new Promise((resolve, reject) => {
             xhr.open('GET', `${url}?key=${key}&contentLength=${fileSize}&contentType=${file.type}`, true);
             xhr.onreadystatechange = (e) => {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        let tokenUrl = JSON.parse(`${xhr.responseText}`)
-                        resolve([tokenUrl.token, fileSize, tokenUrl.key])
-                    } catch (e) {
-                        reject()
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 500) {
+                        try {
+                            let errorInfo = JSON.parse(`${xhr.responseText}`)
+                            console.log(`[x]`,errorInfo.message)
+                            reject()
+                        } catch (e) {
+                            reject()
+                        }
+                    }
+                    if (xhr.status === 200) {
+                        try {
+                            let tokenUrl = JSON.parse(`${xhr.responseText}`)
+                            resolve([tokenUrl.token, fileSize, tokenUrl.key])
+                        } catch (e) {
+                            reject()
+                        }
                     }
                 }
             }
@@ -217,7 +228,7 @@ class CosUppy extends Plugin {
                 this.uppy.emit('upload-error', file, error)
                 return reject(error)
             })
-            
+
 
             this.uppy.on('cancel-all', () => {
                 timer.done()
@@ -230,7 +241,7 @@ class CosUppy extends Plugin {
                     if (xhr.status === 200) {
                         const body = this.getResponseData(xhr.responseText, xhr)
                         const fakeUploadResp = {
-                            uploadURL:"test",
+                            uploadURL: "test",
                             key: key
                         }
                         this.uppy.emit('upload-success', file, fakeUploadResp)
