@@ -89,7 +89,7 @@ class CosUppy extends Plugin {
         let url = this.stsUrl
         let key = file.name
         return new Promise((resolve, reject) => {
-            xhr.open('GET', `${url}?key=${key}&contentLength=${fileSize}&contentType=${file.type}`, true);
+            xhr.open('GET', `${url}?key=${encodeURIComponent(key)}&contentLength=${encodeURIComponent(fileSize)}&contentType=${encodeURIComponent(file.type)}`, true);
             xhr.onreadystatechange = (e) => {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 500) {
